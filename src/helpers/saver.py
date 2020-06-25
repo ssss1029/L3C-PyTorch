@@ -185,10 +185,12 @@ class Restorer(_CheckpointTracker):
     def restore_latest_persistent(self, net):
         return self.restore(net, self.get_lastest_persistent_ckpt())
 
-    def restore(self, modules, ckpt_p, strict=True, restore_restart=False):
+    def restore(self, modules, ckpt_p, strict=True, restore_restart=False, deepaugment=True):
         print('Restoring {}... (strict={})'.format(ckpt_p, strict))
         map_location = None if pe.CUDA_AVAILABLE else 'cpu'
         state_dicts = torch.load(ckpt_p, map_location=map_location)
+        # print(state_dicts.keys())
+        # print(state_dicts['net'].keys())
         # ---
         for key, m in modules.items():
             # optim implements its own load_state_dict which does not have the `strict` keyword...
@@ -202,7 +204,10 @@ class Restorer(_CheckpointTracker):
                         raise ValueError('Error while restoring Optimizer:', str(e))
             else:
                 try:
-                    m.load_state_dict(state_dicts[key], strict=strict)
+                    if key == 'net' and deepaugment == True:
+                        m.load_state_dict(distort(state_dicts[key]), strict=strict)
+                    else:
+                        m.load_state_dict(state_dicts[key], strict=strict)
                 except RuntimeError as e:  # loading error
                     for n, module in sorted(m.named_modules()):
                         print(n, module)
@@ -211,3 +216,6 @@ class Restorer(_CheckpointTracker):
 
 
 
+def distort(weights):
+    print(weights.keys())
+    return weights

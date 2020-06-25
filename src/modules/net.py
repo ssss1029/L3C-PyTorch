@@ -58,6 +58,9 @@ class Net(nn.Module):
             'EDSRDec': EDSRDec
         }[config_ms.dec.cls](config_ms, scale)
 
+        # print(self.enc)
+        # print(self.dec)
+
     def forward(self, x):
         raise NotImplementedError()  # Call .enc and .dec directly
 

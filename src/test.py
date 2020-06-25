@@ -96,6 +96,8 @@ def main():
 
     flags = p.parse_args()
 
+    print(vars(flags))
+
     if flags.compare_theory and not flags.write_to_files:
         raise ValueError('Cannot have --compare_theory without --write_to_files.')
     if flags.write_to_files and flags.sample:
