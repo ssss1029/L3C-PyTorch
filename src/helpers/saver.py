@@ -185,7 +185,7 @@ class Restorer(_CheckpointTracker):
     def restore_latest_persistent(self, net):
         return self.restore(net, self.get_lastest_persistent_ckpt())
 
-    def restore(self, modules, ckpt_p, strict=True, restore_restart=False, deepaugment=True):
+    def restore(self, modules, ckpt_p, strict=True, restore_restart=False, deepaugment=False):
         print('Restoring {}... (strict={})'.format(ckpt_p, strict))
         map_location = None if pe.CUDA_AVAILABLE else 'cpu'
         state_dicts = torch.load(ckpt_p, map_location=map_location)
@@ -217,5 +217,5 @@ class Restorer(_CheckpointTracker):
 
 
 def distort(weights):
-    print(weights.keys())
+    # print(weights.keys())
     return weights

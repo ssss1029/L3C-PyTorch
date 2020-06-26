@@ -157,7 +157,7 @@ def check_correct_torchac_backend_available():
 
 
 class MultiscaleTester(object):
-    def __init__(self, log_date, flags, restore_itr, l3c=False):
+    def __init__(self, log_date, flags, restore_itr, l3c=False, deepaugment=False):
         """
         :param flags:
             log_dir
@@ -196,7 +196,7 @@ class MultiscaleTester(object):
 
         self.restorer = saver.Restorer(paths.get_ckpts_dir(experiment_dir))
         self.restore_itr, ckpt_p = self.restorer.get_ckpt_for_itr(restore_itr)
-        self.restorer.restore({'net': self.blueprint.net}, ckpt_p, strict=True)
+        self.restorer.restore({'net': self.blueprint.net}, ckpt_p, strict=True, deepaugment=deepaugment)
 
         # test_log_dir/0311_1057 cr oi_012
         self.test_log_dir = os.path.join(
@@ -286,6 +286,7 @@ class MultiscaleTester(object):
 
         for i, img in enumerate(ds):
             filename = os.path.splitext(os.path.basename(ds.files[img['idx']]))[0]
+            print("Running", filename)
 
             if _CLEAN_CACHE_PERIODICALLY:
                 _clean_cuda_cache(i)
@@ -342,9 +343,10 @@ class MultiscaleTester(object):
             number_of_crops_str = '|'.join(
                 f'{count}:{freq}' for count, freq in sorted(number_of_crops.items(), reverse=True))
             log += ' crops:freq -> ' + number_of_crops_str
-            _print(log, one_line_output)
+            
+            # _print(log, one_line_output)
 
-        _print(log, one_line_output, final=True)
+        # _print(log, one_line_output, final=True)
 
         if self.flags.write_to_files:
             return None

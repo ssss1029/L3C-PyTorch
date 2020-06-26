@@ -273,12 +273,21 @@ class MultiscaleNetwork(vis.summarizable_module.SummarizableModule):
         inp = x
         enc_outs = []
 
+        print("Input shape = ", inp.shape)
+
         for scale in forward_scales:  # from fine to coarse
             net = self.nets[scale]
             head = self.heads[scale]
 
             inp = head(inp)
             enc_out = net.enc(inp)
+
+            print("enc_out for scale = ", scale)
+            print(enc_out.bn.shape)
+            print(enc_out.bn_q.shape)
+            print(enc_out.S.shape)
+            print(enc_out.L)
+            print(enc_out.F.shape)
             enc_outs.append(enc_out)
             inp = self.get_next_scale_intput(enc_out)  # for next scale
 
@@ -300,10 +309,15 @@ class MultiscaleNetwork(vis.summarizable_module.SummarizableModule):
             dec_out = net.dec(dec_inp, features_to_fuse)
             dec_outs.insert(0, dec_out)
 
+        print(dec_outs[0].F.shape)
+
         for scale, enc_out, dec_out in zip(forward_scales, enc_outs, dec_outs):
             prob_clf = self.prob_clfs[scale]
             P = prob_clf(dec_out.F)
+            print("{0}: P.shape = ".format(scale), P.shape)
             out.append(enc_out, P, self.training)
+        
+        print("------------------------")
 
     def get_P(self, scale, bn_q, dec_F_prev=None):
         """
